@@ -1,9 +1,22 @@
 <?php
 
-function first(){
-    if (isset($_GET['id'])) {
-        $id = $_GET['id'];
+function first($dummy_id)
+{
+    for ($i=0; $i < 15; $i++){
+        print("a random string for example");
+        print($dummy_id);
+    }
 
+
+    $value = 132*123;
+    $stmt_value =  print("a random string for example");
+    if (isset($_GET['id'])) {
+        $id = $dummy_id;
+        $another = first($id);
+        $id = $_GET['id'];
+        $var_with_const = "value";
+
+        first(isset($_GET["asd"]));
         $mysqli = new mysqli('localhost', 'dbuser', 'dbpasswd', 'sql_injection_example');
 
         /* Check connection before executing the SQL query */
@@ -14,7 +27,6 @@ function first(){
 
         $sql = "SELECT username FROM users WHERE id = $id";
 
-        /* Select queries return a result */
         if ($result = $mysqli->query($sql)) {
             while ($obj = $result->fetch_object()) {
                 print($obj->username);
@@ -23,7 +35,9 @@ function first(){
             print($mysqli->error);
         }
     }
+    return 0;
 }
 
-first();
+$exx = 123;
+first($exx);
 
