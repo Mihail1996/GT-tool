@@ -17,7 +17,8 @@ public class FunctionCallGraphListener extends PhpParserBaseListener {
     private final OrderedHashMap<String, Function> functions = new OrderedHashMap<>();
 
     private final static Function ROOT_FUNCTION = new Function("ROOT_FUNCTION");
-    private Stack<FunctionCall> functionCalls = new Stack<>();
+    private Stack<FunctionCall> functionCallsStack = new Stack<>();
+    private Stack<Expression> expressionsStack = new Stack<>();
 
 
     private Function currentFunction = null;
@@ -43,16 +44,16 @@ public class FunctionCallGraphListener extends PhpParserBaseListener {
     public void enterFunctionCall(PhpParser.FunctionCallContext ctx) {
         var funcCall = new FunctionCall(ctx.functionCallName().qualifiedNamespaceName().namespaceNameList().identifier(0).getText());
         currentFunction.getFunctionCalls().add(funcCall);
-        if (currentAssignment != null && functionCalls.empty())
+        if (currentAssignment != null && functionCallsStack.empty())
             currentAssignment.setValue(funcCall);
-        if (!functionCalls.empty())
-            functionCalls.peek().getArguments().add(funcCall);
-        functionCalls.push(funcCall);
+        else if (!functionCallsStack.empty())
+            functionCallsStack.peek().getArguments().add(funcCall);
+        functionCallsStack.push(funcCall);
     }
 
     @Override
     public void exitFunctionCall(PhpParser.FunctionCallContext ctx) {
-        functionCalls.pop();
+        functionCallsStack.pop();
     }
 
     @Override
@@ -65,10 +66,12 @@ public class FunctionCallGraphListener extends PhpParserBaseListener {
     public void enterKeyedVariable(PhpParser.KeyedVariableContext ctx) {
         var var = new Variable(ctx.VarName().getText());
         functions.get(currentFunction.getFunctionName()).getVariables().put(var.getName(), var);
-        if (currentAssignment != null && functionCalls.empty())
+        if (currentAssignment != null && expressionsStack.empty())
             currentAssignment.setVariable(var);
-        else if (!functionCalls.empty())
-            functionCalls.peek().getArguments().add(var);
+        else if (!expressionsStack.empty())
+            expressionsStack.peek().getMembers().add(var);
+        else if (!functionCallsStack.empty())
+            functionCallsStack.peek().getArguments().add(var);
     }
 
     @Override
@@ -84,23 +87,59 @@ public class FunctionCallGraphListener extends PhpParserBaseListener {
 
     @Override
     public void enterStringConstant(PhpParser.StringConstantContext ctx) {
-        if (!functionCalls.empty())
-            functionCalls.peek().getArguments().add(new Constant(ctx.getText()));
+        if (!functionCallsStack.empty())
+            functionCallsStack.peek().getArguments().add(new Constant(ctx.getText()));
     }
 
     @Override
     public void enterInterpolatedStringPart(PhpParser.InterpolatedStringPartContext ctx) {
-        if (!functionCalls.empty())
-            functionCalls.peek().getArguments().add(new Constant(ctx.getText()));
+        var constantString = new Constant(ctx.getText());
+        if (!expressionsStack.empty())
+            expressionsStack.peek().getMembers().add(constantString);
+        else if (!functionCallsStack.empty())
+            functionCallsStack.peek().getArguments().add(constantString);
     }
 
     @Override
     public void enterLiteralConstant(PhpParser.LiteralConstantContext ctx) {
         var constant = new Constant(ctx.getText());
-        if (!functionCalls.empty())
-            functionCalls.peek().getArguments().add(constant);
+        if (!expressionsStack.empty())
+            expressionsStack.peek().getMembers().add(constant);
+        else if (!functionCallsStack.empty())
+            functionCallsStack.peek().getArguments().add(constant);
         else if (currentAssignment != null)
             currentAssignment.setValue(constant);
+    }
+
+    @Override
+    public void enterArithmeticExpression(PhpParser.ArithmeticExpressionContext ctx) {
+        var expr = new Expression();
+        if (currentAssignment != null && expressionsStack.empty())
+            currentAssignment.setValue(expr);
+        else if (!functionCallsStack.empty())
+            functionCallsStack.peek().getArguments().add(expr);
+        expressionsStack.push(expr);
+    }
+
+    @Override
+    public void exitArithmeticExpression(PhpParser.ArithmeticExpressionContext ctx) {
+        expressionsStack.pop();
+    }
+
+    @Override
+    public void enterChainExpression(PhpParser.ChainExpressionContext ctx) {
+        var expr = new Expression();
+        if (currentAssignment != null && expressionsStack.empty())
+            currentAssignment.setValue(expr);
+        else if (!functionCallsStack.empty())
+            functionCallsStack.peek().getArguments().add(expr);
+        expressionsStack.push(expr);
+    }
+
+    @Override
+    public void exitChainExpression(PhpParser.ChainExpressionContext ctx) {
+        expressionsStack.pop();
+
     }
 
 }

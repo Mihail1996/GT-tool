@@ -2,16 +2,13 @@
 
 function first($dummy_id)
 {
-    for ($i = 0; $i < 15; $i++) {
-        print("a random string for example");
-        print($dummy_id);
-    }
+
 
     $value = 132 * 123;
-    $stmt_value = print("a random string for example");
-    $test = another_function(first(another_function($value, $stmt_value)), "1231");
+ //   $test = first(another_function($value, $stmt_value) . "1231");
     first(false);
-    another_function("string", 1111);
+    first("string". 1111);
+
     if (isset($_GET['id'])) {
         $id = $dummy_id;
         $another = first($id);
@@ -21,7 +18,6 @@ function first($dummy_id)
         first(isset($_GET["asd"]));
         $mysqli = new mysqli('localhost', 'dbuser', 'dbpasswd', 'sql_injection_example');
 
-        /* Check connection before executing the SQL query */
         if ($mysqli->connect_errno) {
             printf("Connect failed: %s\n", $mysqli->connect_error);
             exit();
