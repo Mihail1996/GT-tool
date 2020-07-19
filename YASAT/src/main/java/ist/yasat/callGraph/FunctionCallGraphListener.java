@@ -7,17 +7,21 @@ import ist.yasat.settings.Settings;
 import lombok.Getter;
 import org.antlr.v4.misc.OrderedHashMap;
 
+import java.util.Stack;
+
 
 public class FunctionCallGraphListener extends PhpParserBaseListener {
+    private Settings settings;
 
     @Getter
     private final OrderedHashMap<String, Function> functions = new OrderedHashMap<>();
 
     private final static Function ROOT_FUNCTION = new Function("ROOT_FUNCTION");
-    private Function currentFunction = null;
-    private Settings settings;
-    private Assignment currentAssignment = null;
+    private Stack<FunctionCall> functionCalls = new Stack<>();
 
+
+    private Function currentFunction = null;
+    private Assignment currentAssignment = null;
 
     public FunctionCallGraphListener(Settings settings) {
         this.settings = settings;
@@ -37,12 +41,18 @@ public class FunctionCallGraphListener extends PhpParserBaseListener {
 
     @Override
     public void enterFunctionCall(PhpParser.FunctionCallContext ctx) {
-        var func = currentFunction != null ? currentFunction : ROOT_FUNCTION;
-        try {
-            func.getFunctionCalls().add(new FunctionCall(ctx.functionCallName().qualifiedNamespaceName().namespaceNameList().identifier(0).getText()));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        var funcCall = new FunctionCall(ctx.functionCallName().qualifiedNamespaceName().namespaceNameList().identifier(0).getText());
+        currentFunction.getFunctionCalls().add(funcCall);
+        if (currentAssignment != null && functionCalls.empty())
+            currentAssignment.setValue(funcCall);
+        if (!functionCalls.empty())
+            functionCalls.peek().getArguments().add(funcCall);
+        functionCalls.push(funcCall);
+    }
+
+    @Override
+    public void exitFunctionCall(PhpParser.FunctionCallContext ctx) {
+        functionCalls.pop();
     }
 
     @Override
@@ -55,8 +65,10 @@ public class FunctionCallGraphListener extends PhpParserBaseListener {
     public void enterKeyedVariable(PhpParser.KeyedVariableContext ctx) {
         var var = new Variable(ctx.VarName().getText());
         functions.get(currentFunction.getFunctionName()).getVariables().put(var.getName(), var);
-        if (currentAssignment != null)
+        if (currentAssignment != null && functionCalls.empty())
             currentAssignment.setVariable(var);
+        else if (!functionCalls.empty())
+            functionCalls.peek().getArguments().add(var);
     }
 
     @Override
@@ -65,10 +77,30 @@ public class FunctionCallGraphListener extends PhpParserBaseListener {
         currentFunction.getStatements().add(currentAssignment);
     }
 
-
     @Override
     public void exitAssignmentExpression(PhpParser.AssignmentExpressionContext ctx) {
         currentAssignment = null;
+    }
+
+    @Override
+    public void enterStringConstant(PhpParser.StringConstantContext ctx) {
+        if (!functionCalls.empty())
+            functionCalls.peek().getArguments().add(new Constant(ctx.getText()));
+    }
+
+    @Override
+    public void enterInterpolatedStringPart(PhpParser.InterpolatedStringPartContext ctx) {
+        if (!functionCalls.empty())
+            functionCalls.peek().getArguments().add(new Constant(ctx.getText()));
+    }
+
+    @Override
+    public void enterLiteralConstant(PhpParser.LiteralConstantContext ctx) {
+        var constant = new Constant(ctx.getText());
+        if (!functionCalls.empty())
+            functionCalls.peek().getArguments().add(constant);
+        else if (currentAssignment != null)
+            currentAssignment.setValue(constant);
     }
 
 }

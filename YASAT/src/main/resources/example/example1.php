@@ -2,14 +2,16 @@
 
 function first($dummy_id)
 {
-    for ($i=0; $i < 15; $i++){
+    for ($i = 0; $i < 15; $i++) {
         print("a random string for example");
         print($dummy_id);
     }
 
-
-    $value = 132*123;
-    $stmt_value =  print("a random string for example");
+    $value = 132 * 123;
+    $stmt_value = print("a random string for example");
+    $test = another_function(first(another_function($value, $stmt_value)), "1231");
+    first(false);
+    another_function("string", 1111);
     if (isset($_GET['id'])) {
         $id = $dummy_id;
         $another = first($id);
@@ -35,6 +37,11 @@ function first($dummy_id)
             print($mysqli->error);
         }
     }
+    return 0;
+}
+
+function another_function($input, $expr)
+{
     return 0;
 }
 

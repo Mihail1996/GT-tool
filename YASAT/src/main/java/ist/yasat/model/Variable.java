@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor
-public class Variable extends Taintable {
+public class Variable extends Expression {
     @NonNull
     private String name;
     private String type;
