@@ -1,15 +1,14 @@
 package ist.yasat.model;
 
-import lombok.AllArgsConstructor;
+import ist.yasat.expressionVisitor.Visitor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class ArithmeticOperation extends Expression {
-    private List<Expression> expressions = new ArrayList<>();
+    @Override
+    public void accept(Visitor v) {
+        v.visit(this);
+    }
 }

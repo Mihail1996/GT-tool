@@ -30,9 +30,6 @@ public class ParserRun {
         var listener = new FunctionCallGraphListener(settings);
         walker.walk(listener, tree);
         var graph = listener.getFunctions();
-        var param = new Parameter("sd", "sdgsd");
-        var expr = new Expression();
-        expr.setTainted(true);
         System.out.println("Success");
 
     }

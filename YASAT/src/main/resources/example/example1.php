@@ -4,10 +4,12 @@ function first($dummy_id)
 {
 
 
-    $value = 132 * 123;
- //   $test = first(another_function($value, $stmt_value) . "1231");
+    $value = first((132 * 123)."asddasd");
+    $stmt_value = 100;
+    $test = first(another_function($value, $stmt_value) . "1231");
     first(false);
     first("string". 1111);
+    first(11+ 1111);
 
     if (isset($_GET['id'])) {
         $id = $dummy_id;
