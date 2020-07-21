@@ -33,4 +33,9 @@ public class ExpressionVisitor implements Visitor {
             expression.setValue(expr);
     }
 
+    @Override
+    public void visit(ReturnStatement returnStatement) {
+        returnStatement.setExpression(expr);
+    }
+
 }

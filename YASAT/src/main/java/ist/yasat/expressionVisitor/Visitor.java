@@ -8,4 +8,5 @@ public interface Visitor {
     void visit(FunctionCall e);
     void visit(Expression expression);
     void visit(Assignment expression);
+    void visit(ReturnStatement returnStatement);
 }

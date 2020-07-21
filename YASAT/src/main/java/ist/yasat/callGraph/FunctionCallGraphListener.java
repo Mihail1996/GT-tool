@@ -4,7 +4,6 @@ import ist.yasat.expressionVisitor.ExpressionVisitor;
 import ist.yasat.model.*;
 import ist.yasat.parser.PhpParser;
 import ist.yasat.parser.PhpParserBaseListener;
-import ist.yasat.settings.Settings;
 import lombok.Getter;
 import org.antlr.v4.misc.OrderedHashMap;
 
@@ -12,25 +11,23 @@ import java.util.Stack;
 
 
 public class FunctionCallGraphListener extends PhpParserBaseListener {
-    private Settings settings;
 
     @Getter
     private final OrderedHashMap<String, Function> functions = new OrderedHashMap<>();
 
     private final static Function ROOT_FUNCTION = new Function("ROOT_FUNCTION");
 
-    private final Stack<Expression> expressions = new Stack<>();
+    private final Stack<Statement> exprsAndStmts = new Stack<>();
 
     private Function currentFunction = null;
 
-    public FunctionCallGraphListener(Settings settings) {
-        this.settings = settings;
+    public FunctionCallGraphListener() {
         functions.put(ROOT_FUNCTION.getFunctionName(), ROOT_FUNCTION);
     }
 
     private void processExpression(Expression expression) {
-        if (!expressions.empty())
-            expressions.peek().accept(new ExpressionVisitor(expression));
+        if (!exprsAndStmts.empty())
+            exprsAndStmts.peek().accept(new ExpressionVisitor(expression));
     }
 
     @Override
@@ -49,12 +46,12 @@ public class FunctionCallGraphListener extends PhpParserBaseListener {
         var funcCall = new FunctionCall(ctx.functionCallName().qualifiedNamespaceName().namespaceNameList().identifier(0).getText());
         currentFunction.getFunctionCalls().add(funcCall);
         processExpression(funcCall);
-        expressions.push(funcCall);
+        exprsAndStmts.push(funcCall);
     }
 
     @Override
     public void exitFunctionCall(PhpParser.FunctionCallContext ctx) {
-        expressions.pop();
+        exprsAndStmts.pop();
     }
 
     @Override
@@ -74,12 +71,12 @@ public class FunctionCallGraphListener extends PhpParserBaseListener {
     public void enterAssignmentExpression(PhpParser.AssignmentExpressionContext ctx) {
         var assignment = new Assignment();
         currentFunction.getStatements().add(assignment);
-        expressions.push(assignment);
+        exprsAndStmts.push(assignment);
     }
 
     @Override
     public void exitAssignmentExpression(PhpParser.AssignmentExpressionContext ctx) {
-        expressions.pop();
+        exprsAndStmts.pop();
     }
 
     @Override
@@ -94,26 +91,56 @@ public class FunctionCallGraphListener extends PhpParserBaseListener {
 
     @Override
     public void enterArithmeticExpression(PhpParser.ArithmeticExpressionContext ctx) {
-        var expr = new ArithmeticOperation();
-        processExpression(expr);
-        expressions.push(expr);
+        processGenericExpression(ArithmeticOperation.class);
+
     }
 
     @Override
     public void exitArithmeticExpression(PhpParser.ArithmeticExpressionContext ctx) {
-        expressions.pop();
+        exprsAndStmts.pop();
     }
 
     @Override
     public void enterChainExpression(PhpParser.ChainExpressionContext ctx) {
-        var expr = new Expression();
-        processExpression(expr);
-        expressions.push(expr);
+        processGenericExpression(Expression.class);
     }
 
     @Override
     public void exitChainExpression(PhpParser.ChainExpressionContext ctx) {
-        expressions.pop();
+        exprsAndStmts.pop();
     }
+
+    @Override
+    public void enterReturnStatement(PhpParser.ReturnStatementContext ctx) {
+        var stmt = new ReturnStatement();
+        currentFunction.getStatements().add(stmt);
+        exprsAndStmts.push(stmt);
+    }
+
+    @Override
+    public void exitReturnStatement(PhpParser.ReturnStatementContext ctx) {
+        exprsAndStmts.pop();
+    }
+
+    @Override
+    public void enterScalarExpression(PhpParser.ScalarExpressionContext ctx) {
+        processGenericExpression(Expression.class);
+    }
+
+    @Override
+    public void exitScalarExpression(PhpParser.ScalarExpressionContext ctx) {
+        exprsAndStmts.pop();
+    }
+
+    public <T extends Expression> void processGenericExpression(Class<T> klass) {
+        try {
+            T expr = klass.getDeclaredConstructor().newInstance();
+            processExpression(expr);
+            exprsAndStmts.push(expr);
+        } catch (Exception e) {
+            System.out.println("An error has occurred " + e.getMessage());
+        }
+    }
+
 
 }
