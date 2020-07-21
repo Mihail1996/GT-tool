@@ -1,9 +1,11 @@
 package ist.yasat.model;
 
-import lombok.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
-@Data
-@NoArgsConstructor
+@Data@NoArgsConstructor
 @RequiredArgsConstructor
 public class Parameter extends Taintable {
     @NonNull

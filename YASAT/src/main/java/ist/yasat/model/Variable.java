@@ -1,10 +1,8 @@
 package ist.yasat.model;
 
 import ist.yasat.expressionVisitor.Visitor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
+
 
 @Data
 @NoArgsConstructor
@@ -15,7 +13,7 @@ public class Variable extends Expression {
     private String type;
 
     @Override
-    public void accept(Visitor v) {
-        v.visit(this);
+    public boolean accept(Visitor v) {
+        return v.visit(this);
     }
 }

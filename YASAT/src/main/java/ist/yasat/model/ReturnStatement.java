@@ -11,7 +11,7 @@ public class ReturnStatement implements Statement {
     private Expression expression;
 
     @Override
-    public void accept(Visitor v) {
-        v.visit(this);
+    public boolean accept(Visitor v) {
+        return v.visit(this);
     }
 }

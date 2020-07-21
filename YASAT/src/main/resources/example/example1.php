@@ -1,17 +1,25 @@
 <?php
 
+$tainted_id = "taintedId";
+
 function first($id)
 {
 
     $sql = "SELECT username FROM users WHERE id =  $id";
 
+    $non_tainted = "asasdas"+1222;
+
+    $sql = "sasdfsdf";
+
     $result = mysql_query($sql);
 
-    return 0;
+    return $result;
 }
 
 function another_function($input, $expr)
 {
     return first("sdfs");
 }
+
+$tainted_value = first($tainted_id);
 

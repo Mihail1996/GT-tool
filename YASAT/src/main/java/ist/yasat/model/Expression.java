@@ -12,7 +12,7 @@ import java.util.List;
 public class Expression extends Taintable implements Statement {
     private List<Expression> members = new ArrayList<>();
 
-    public void accept(Visitor v) {
-        v.visit(this);
+    public boolean accept(Visitor v) {
+        return v.visit(this);
     }
 }

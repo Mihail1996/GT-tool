@@ -1,23 +1,21 @@
 package ist.yasat.model;
 
 import ist.yasat.expressionVisitor.Visitor;
-import lombok.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@RequiredArgsConstructor
 
 public class FunctionCall extends Expression {
     @NonNull
     private String functionName;
-    private List<Expression> arguments = new ArrayList<>();
 
     @Override
-    public void accept(Visitor v) {
-        v.visit(this);
+    public boolean accept(Visitor v) {
+        return v.visit(this);
     }
 }

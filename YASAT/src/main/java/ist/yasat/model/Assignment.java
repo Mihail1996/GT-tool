@@ -14,7 +14,7 @@ public class Assignment extends Expression {
     private Expression value;
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
+    public boolean accept(Visitor visitor) {
+        return visitor.visit(this);
     }
 }

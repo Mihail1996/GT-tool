@@ -4,9 +4,11 @@ import ist.yasat.model.*;
 
 public interface Visitor {
 
-    void visit(ArithmeticOperation e);
-    void visit(FunctionCall e);
-    void visit(Expression expression);
-    void visit(Assignment expression);
-    void visit(ReturnStatement returnStatement);
+    boolean visit(ArithmeticOperation e);
+    boolean visit(FunctionCall e);
+    boolean visit(Expression e);
+    boolean visit(Assignment e);
+    boolean visit(ReturnStatement stmt);
+    boolean visit(Variable var);
+    boolean visit(Constant constant);
 }

@@ -19,10 +19,11 @@ public class FunctionCallGraphListener extends PhpParserBaseListener {
 
     private final Stack<Statement> exprsAndStmts = new Stack<>();
 
-    private Function currentFunction = null;
+    private Function currentFunction;
 
     public FunctionCallGraphListener() {
         functions.put(ROOT_FUNCTION.getFunctionName(), ROOT_FUNCTION);
+        currentFunction = ROOT_FUNCTION;
     }
 
     private void processExpression(Expression expression) {
@@ -62,8 +63,13 @@ public class FunctionCallGraphListener extends PhpParserBaseListener {
 
     @Override
     public void enterKeyedVariable(PhpParser.KeyedVariableContext ctx) {
-        var var = new Variable(ctx.VarName().getText());
-        functions.get(currentFunction.getFunctionName()).getVariables().put(var.getName(), var);
+        Variable var;
+        if (currentFunction.getVariables().containsKey(ctx.VarName().getText()))
+            var = currentFunction.getVariables().get(ctx.VarName().getText());
+        else {
+            var = new Variable(ctx.VarName().getText());
+            currentFunction.getVariables().put(var.getName(), var);
+        }
         processExpression(var);
     }
 

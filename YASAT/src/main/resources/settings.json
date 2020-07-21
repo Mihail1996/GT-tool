@@ -1,7 +1,7 @@
 {
   "taintSettings": {
-    "first": [
-      "id"
+    "ROOT_FUNCTION": [
+      "$tainted_id"
     ]
   }
 }
