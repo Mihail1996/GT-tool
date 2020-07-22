@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class Constant extends Expression {
+public class  Constant extends Expression {
     public Object value;
 
     @Override

@@ -147,6 +147,4 @@ public class FunctionCallGraphListener extends PhpParserBaseListener {
             System.out.println("An error has occurred " + e.getMessage());
         }
     }
-
-
 }

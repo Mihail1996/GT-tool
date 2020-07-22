@@ -7,14 +7,15 @@ function first($id)
 
     $sql = "SELECT username FROM users WHERE id =  $id";
 
-    $non_tainted = "asasdas"+1222;
+    $non_tainted = ("asasdas"+1222) + "asdasd";
 
-    $sql = "sasdfsdf";
+    $sql = "Select";
 
     $result = mysql_query($sql);
-
+ 
     return $result;
 }
+
 
 function another_function($input, $expr)
 {
